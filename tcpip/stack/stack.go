@@ -1044,11 +1044,23 @@ func (s *Stack) Close() error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	for _, nic := range s.nics {
-		for _, r := range nic.endpoints {
+	for id, nic := range s.nics {
+		nic.mu.Lock()
+		for epid, r := range nic.endpoints {
 			r.ep.Close()
+			delete(nic.endpoints, epid)
 		}
+		nic.mu.Unlock()
+		nic.linkEP = nil
+		delete(s.nics, id)
 	}
+
+	transportProtocols = make(map[string]TransportProtocolFactory)
+	networkProtocols = make(map[string]NetworkProtocolFactory)
+
+	linkEPMu.Lock()
+	linkEndpoints = make(map[tcpip.LinkEndpointID]LinkEndpoint)
+	linkEPMu.Unlock()
 
 	return nil
 }
