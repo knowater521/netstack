@@ -850,8 +850,8 @@ var danglingEndpoints = make(map[Endpoint]struct{})
 
 // GetDanglingEndpoints returns all dangling endpoints.
 func GetDanglingEndpoints() []Endpoint {
-	es := make([]Endpoint, 0, len(danglingEndpoints))
 	danglingEndpointsMu.Lock()
+	es := make([]Endpoint, 0, len(danglingEndpoints))
 	for e := range danglingEndpoints {
 		es = append(es, e)
 	}
