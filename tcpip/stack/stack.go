@@ -1039,3 +1039,16 @@ func (s *Stack) JoinGroup(protocol tcpip.NetworkProtocolNumber, nicID tcpip.NICI
 func (s *Stack) LeaveGroup(protocol tcpip.NetworkProtocolNumber, nicID tcpip.NICID, multicastAddr tcpip.Address) *tcpip.Error {
 	return s.RemoveAddress(nicID, multicastAddr)
 }
+
+func (s *Stack) Close() error {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	for _, nic := range s.nics {
+		for _, r := range nic.endpoints {
+			r.ep.Close()
+		}
+	}
+
+	return nil
+}
