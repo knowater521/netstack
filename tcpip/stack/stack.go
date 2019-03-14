@@ -1055,8 +1055,13 @@ func (s *Stack) Close() error {
 		delete(s.nics, id)
 	}
 
-	transportProtocols = make(map[string]TransportProtocolFactory)
-	networkProtocols = make(map[string]NetworkProtocolFactory)
+	s.transportProtocols = nil
+	s.networkProtocols = nil
+	s.linkAddrResolvers = nil
+	s.demux = nil
+	s.linkAddrCache = nil
+	s.nics = nil
+	s.routeTable = nil
 
 	linkEPMu.Lock()
 	linkEndpoints = make(map[tcpip.LinkEndpointID]LinkEndpoint)
