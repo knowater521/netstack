@@ -1040,11 +1040,23 @@ func (s *Stack) LeaveGroup(protocol tcpip.NetworkProtocolNumber, nicID tcpip.NIC
 	return s.RemoveAddress(nicID, multicastAddr)
 }
 
+// Close the stack. This wipes cached information (i.e. route tables), so many stack functions will
+// return an error once a stack is closed.
 func (s *Stack) Close() error {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
-	for id, nic := range s.nics {
+	nics := s.nics
+
+	s.transportProtocols = make(map[tcpip.TransportProtocolNumber]*transportProtocolState)
+	s.networkProtocols = make(map[tcpip.NetworkProtocolNumber]NetworkProtocol)
+	s.linkAddrResolvers = make(map[tcpip.NetworkProtocolNumber]LinkAddressResolver)
+	s.demux = newTransportDemuxer(s)
+	s.linkAddrCache = newLinkAddrCache(ageLimit, resolutionTimeout, resolutionAttempts)
+	s.nics = make(map[tcpip.NICID]*NIC)
+	s.routeTable = nil
+
+	for _, nic := range nics {
 		nic.mu.Lock()
 		for epid, r := range nic.endpoints {
 			r.ep.Close()
@@ -1052,16 +1064,7 @@ func (s *Stack) Close() error {
 		}
 		nic.mu.Unlock()
 		nic.linkEP = nil
-		delete(s.nics, id)
 	}
-
-	s.transportProtocols = nil
-	s.networkProtocols = nil
-	s.linkAddrResolvers = nil
-	s.demux = nil
-	s.linkAddrCache = nil
-	s.nics = nil
-	s.routeTable = nil
 
 	linkEPMu.Lock()
 	linkEndpoints = make(map[tcpip.LinkEndpointID]LinkEndpoint)
