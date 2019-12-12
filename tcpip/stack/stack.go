@@ -355,6 +355,8 @@ func (u *uniqueIDGenerator) UniqueID() uint64 {
 // Stack is a networking stack, with all supported protocols, NICs, and route
 // table.
 type Stack struct {
+	stats tcpip.Stats
+
 	transportProtocols map[tcpip.TransportProtocolNumber]*transportProtocolState
 	networkProtocols   map[tcpip.NetworkProtocolNumber]NetworkProtocol
 	linkAddrResolvers  map[tcpip.NetworkProtocolNumber]LinkAddressResolver
@@ -364,8 +366,6 @@ type Stack struct {
 	rawFactory RawFactory
 
 	demux *transportDemuxer
-
-	stats tcpip.Stats
 
 	linkAddrCache *linkAddrCache
 
@@ -431,6 +431,9 @@ type UniqueID interface {
 
 // Options contains optional Stack configuration.
 type Options struct {
+	// Stats are optional statistic counters.
+	Stats tcpip.Stats
+
 	// NetworkProtocols lists the network protocols to enable.
 	NetworkProtocols []NetworkProtocol
 
@@ -441,9 +444,6 @@ type Options struct {
 	//
 	// If no Clock is specified, the clock source will be time.Now.
 	Clock tcpip.Clock
-
-	// Stats are optional statistic counters.
-	Stats tcpip.Stats
 
 	// HandleLocal indicates whether packets destined to their source
 	// should be handled by the stack internally (true) or outside the

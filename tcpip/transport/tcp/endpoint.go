@@ -280,6 +280,9 @@ func (*EndpointInfo) IsEndpointInfo() {}
 //
 // +stateify savable
 type endpoint struct {
+	// TODO(b/142022063): Add ability to save and restore per endpoint stats.
+	stats Stats
+
 	EndpointInfo
 
 	// workMu is used to arbitrate which goroutine may perform protocol
@@ -510,9 +513,6 @@ type endpoint struct {
 	sendTOS uint8
 
 	gso *stack.GSO
-
-	// TODO(b/142022063): Add ability to save and restore per endpoint stats.
-	stats Stats
 
 	// tcpLingerTimeout is the maximum amount of a time a socket
 	// a socket stays in TIME_WAIT state before being marked

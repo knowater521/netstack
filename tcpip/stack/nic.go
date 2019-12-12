@@ -27,6 +27,8 @@ import (
 // NIC represents a "network interface card" to which the networking stack is
 // attached.
 type NIC struct {
+	stats NICStats
+
 	stack    *Stack
 	id       tcpip.NICID
 	name     string
@@ -43,8 +45,6 @@ type NIC struct {
 	// packetEPs is protected by mu, but the contained PacketEndpoint
 	// values are not.
 	packetEPs map[tcpip.NetworkProtocolNumber][]PacketEndpoint
-
-	stats NICStats
 
 	// ndp is the NDP related state for NIC.
 	//
