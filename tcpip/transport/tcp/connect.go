@@ -16,6 +16,7 @@ package tcp
 
 import (
 	"encoding/binary"
+	"fmt"
 	"sync"
 	"time"
 
@@ -1086,6 +1087,13 @@ func (e *endpoint) disableKeepaliveTimer() {
 // goroutine and is responsible for sending segments and handling received
 // segments.
 func (e *endpoint) protocolMainLoop(handshake bool) *tcpip.Error {
+	defer func() {
+		p := recover()
+		if p != nil {
+			fmt.Printf("nestatck tcpip.protocolMainLoop recovered from panic: %v\n", p)
+		}
+	}()
+
 	var closeTimer *time.Timer
 	var closeWaker sleep.Waker
 
